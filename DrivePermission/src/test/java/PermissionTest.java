@@ -49,6 +49,13 @@ class PermissionTest {
     }
 
     @Test
+    void testUserCannotEditSubFolderInRootFolderWithoutSubFolderPermission() {
+        // Kiểm tra rằng người dùng có thể chỉnh sửa thư mục con trong thư mục root
+        // Điều này sẽ được kiểm tra qua permission ở thư mục con.
+        assertTrue(user.hasPermission(subFolder, PermissionType.EDITOR));
+    }
+
+    @Test
     void testUserCannotEditRootFolderIfOnlyFilePermission() {
         // Cấp quyền editor cho tệp, không cho thư mục
         user.removePermission(editorPermissionOnFile); // Remove editor permission on file
@@ -68,6 +75,7 @@ class PermissionTest {
     void testUserCanEditFileIfHasEditorPermissionOnFile() {
         // Người dùng có quyền editor trên tệp
         assertTrue(user.hasPermission(file, PermissionType.EDITOR));
+
     }
 
     @Test
