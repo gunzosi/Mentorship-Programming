@@ -25,6 +25,6 @@ public class File extends Store {
 
     @Override
     public String toString() {
-        return "File: { name = " + name  + '}';
+        return "File: { name = " + name + " }";
     }
 }

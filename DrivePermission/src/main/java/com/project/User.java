@@ -2,7 +2,6 @@ package com.project;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class User {
     private int id;
@@ -12,50 +11,53 @@ public class User {
     public User(int id, String email) {
         this.id = id;
         this.email = email;
+        this.permissions = new ArrayList<>();
     }
 
     public User(int id, String email, List<Permission> permissions) {
         this.id = id;
         this.email = email;
-        this.permissions = permissions != null ? permissions : new ArrayList<>();
+        this.permissions = permissions;
     }
 
     public void addPermission(Permission permission) {
-        permissions.add(permission);
+        this.permissions.add(permission);
     }
 
     public void removePermission(Permission permission) {
-        permissions.remove(permission);
+        this.permissions.remove(permission);
     }
 
-    public List<Permission> getPermissionsForFolder(Folder folder) {
-        return permissions.stream()
-                .filter(permission -> permission.getStore().equals(folder))
-                .collect(Collectors.toList());
+    public boolean hasPermission(Store store, PermissionType permissionType) {
+        for (Permission permission : permissions) {
+            if (permission.getStore().equals(store) && permission.getPermissionType() == permissionType) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public boolean hasPermission(Store store, PermissionType type ){
-        return permissions.stream()
-                .anyMatch(p -> p.getStore().equals(store) && p.getPermissionType().equals(type));
+    // Phương thức mới để kiểm tra xem người dùng có thể tạo thư mục hoặc tệp không
+    public boolean canCreate(Store store) {
+        if (store instanceof Folder) {
+            Folder folder = (Folder) store;
+            // Kiểm tra quyền ADMIN trên thư mục hoặc quyền trên thư mục cha của thư mục hiện tại
+            return hasPermission(folder, PermissionType.ADMIN) ||
+                    (folder.getParent() != null && hasPermission(folder.getParent(), PermissionType.ADMIN));
+        }
+        return false;
     }
 
-    // Getter - Setter
+    // Other getters and setters
     public int getId() {
         return id;
     }
-    public void setId(int id) {
-        this.id = id;
-    }
+
     public String getEmail() {
         return email;
     }
-    public void setEmail(String email) {
-        this.email = email;
-    }
+
     public List<Permission> getPermissions() {
         return permissions;
-    }
-    public void setPermissions(List<Permission> permissions) {
-        this.permissions = permissions;
     }
 }

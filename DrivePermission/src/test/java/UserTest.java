@@ -1,63 +1,57 @@
-package com.project;
-
+import com.project.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-class UserTest {
+public class UserTest {
     private User user;
     private Folder rootFolder;
     private Folder subFolder;
-    private Permission editorPermission;
+    private File file;
+    private Permission readPermission;
+    private Permission adminPermission;
 
     @BeforeEach
     void setUp() {
+        user = new User(1, "user@example.com");
         rootFolder = new Folder(1, "Root Folder");
         subFolder = new Folder(2, "Sub Folder");
+        file = new File(3, "File");
 
-        // Initialize user with editor permission on rootFolder
-        editorPermission = new Permission(rootFolder, PermissionType.EDITOR);
-        List<Permission> permissions = new ArrayList<>();
-        permissions.add(editorPermission);
-        user = new User(1, "user@example.com", permissions);
+        readPermission = new Permission(rootFolder, user, PermissionType.READ);
+        adminPermission = new Permission(subFolder, user, PermissionType.ADMIN);
 
-        // Add subFolder to rootFolder
+        user.addPermission(readPermission);
+        user.addPermission(adminPermission);
+
         rootFolder.addChild(subFolder);
+        subFolder.addChild(file);
     }
 
     @Test
-    void testCreateSubFolderWithEditorPermissionOnRoot() {
-        // Simulate user creating a new subfolder in rootFolder
-        if (user.hasPermission(rootFolder, PermissionType.EDITOR)) {
-            Folder newSubFolder = new Folder(3, "New Sub Folder");
-            rootFolder.addChild(newSubFolder);
-            assertTrue(rootFolder.getChildren().contains(newSubFolder));
-        } else {
-            fail("User doesn't have editor permission on root folder.");
-        }
+    void testUserCanReadRootFolder() {
+        assertTrue(user.hasPermission(rootFolder, PermissionType.READ));
     }
 
     @Test
-    void testCreateFolderAndFileInSubFolder() {
-        // Add editor permission to user for subFolder
-        Permission subFolderEditorPermission = new Permission(subFolder, PermissionType.EDITOR);
-        user.addPermission(subFolderEditorPermission);
+    void testUserCanAdminSubFolder() {
+        assertTrue(user.hasPermission(subFolder, PermissionType.ADMIN));
+    }
 
-        // Simulate user creating a new folder and a new file in subFolder
-        if (user.hasPermission(subFolder, PermissionType.EDITOR)) {
-            Folder newFolderInSubFolder = new Folder(4, "New Folder in SubFolder");
-            File newFileInSubFolder = new File(5, "New File in SubFolder");
+    @Test
+    void testUserCannotAdminRootFolderWithoutAdminPermission() {
+        assertFalse(user.hasPermission(rootFolder, PermissionType.ADMIN));
+    }
 
-            subFolder.addChild(newFolderInSubFolder);
-            subFolder.addChild(newFileInSubFolder);
-
-            assertTrue(subFolder.getChildren().contains(newFolderInSubFolder));
-            assertTrue(subFolder.getChildren().contains(newFileInSubFolder));
+    @Test
+    void testUserCanCreateFileInSubFolderWithAdminPermission() {
+        if (user.hasPermission(subFolder, PermissionType.ADMIN)) {
+            File newFile = new File(4, "New File");
+            subFolder.addChild(newFile);
+            assertTrue(subFolder.getChildren().contains(newFile));
         } else {
-            fail("User doesn't have editor permission on subfolder.");
+            fail("User doesn't have admin permission on subFolder.");
         }
     }
 }

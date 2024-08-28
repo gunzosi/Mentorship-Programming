@@ -1,19 +1,23 @@
 import com.project.Drive;
 import com.project.Folder;
+import com.project.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DriveTest {
     private Drive drive;
     private Folder rootFolder;
+    private User owner;
+    private User anotherUser;
 
     @BeforeEach
     void setUp() {
-        drive = new Drive(1,"My Drive");
-        rootFolder = new Folder(1, "Test Folder");
+        owner = new User(1, "owner@example.com");
+        drive = new Drive(1, "My Drive", owner);
+        rootFolder = new Folder(1, "Root Folder");
+        anotherUser = new User(2, "user@example.com");
     }
 
     @Test
@@ -27,5 +31,23 @@ public class DriveTest {
         drive.addChild(rootFolder);
         drive.removeChild(rootFolder);
         assertFalse(drive.getChildren().contains(rootFolder));
+    }
+
+    @Test
+    void testAddUserToDrive() {
+        drive.addUser(anotherUser);
+        assertTrue(drive.getUsers().contains(anotherUser));
+    }
+
+    @Test
+    void testRemoveUserFromDrive() {
+        drive.addUser(anotherUser);
+        drive.removeUser(anotherUser);
+        assertFalse(drive.getUsers().contains(anotherUser));
+    }
+
+    @Test
+    void testOwnerIsAutomaticallyAddedToDrive() {
+        assertTrue(drive.getUsers().contains(owner));
     }
 }
